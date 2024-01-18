@@ -57,12 +57,13 @@ class Sampler(nn.Module):
          do_typical_ps, do_mirostat) = (SamplingTensors.from_sampling_metadata(
              sampling_metadata, vocab_size, logits.device, logits.dtype))
 
-        if do_temperatures:
-            # Apply temperature scaling.
-            # Use in-place division to avoid creating a new tensor.
-            logits = _apply_temperature(logits, sampling_tensors.temperatures,
-                                        sampling_tensors.dynatemp_ranges,
-                                        sampling_tensors.dynatemp_exps)
+        def apply_temperature_if_needed(logits, do_temperatures, sampling_tensors):
+            if do_temperatures and not sampling_metadata.sampling_params.temperature_last:
+                logits = _apply_temperature(logits, sampling_tensors.temperatures,
+                                            sampling_tensors.dynatemp_ranges,
+                                            sampling_tensors.dynatemp_exps)
+        
+        logits = apply_temperature_if_needed(logits, do_temperatures, sampling_tensors)
 
         if do_penalties:
             logits = _apply_penalties(logits, sampling_tensors.prompt_tokens,
@@ -95,6 +96,11 @@ class Sampler(nn.Module):
         banned_tokens = _get_custom_token_bans(sampling_metadata)
         assert len(banned_tokens) == logits.shape[0]
         logits = _apply_token_bans(logits, banned_tokens)
+
+        if sampling_metadata.sampling_params.temperature_last:
+            logits = _apply_temperature(logits, sampling_tensors.temperatures,
+                                        sampling_tensors.dynatemp_ranges,
+                                        sampling_tensors.dynatemp_exps)
 
         logits = _apply_logits_processors(sampling_metadata, logits,
                                           sampling_tensors.output_tokens)

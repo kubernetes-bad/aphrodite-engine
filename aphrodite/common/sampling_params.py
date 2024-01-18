@@ -76,6 +76,7 @@ class SamplingParams:
             setting `temperature=0.4` and `dynatemp_range=0.1` will result
             in a minimum temp of 0.3 and max of 0.5.
         dynatemp_exponent: Exponent for dynatemp sampling. Range [0, inf).
+        temperature_last: Apply temperature scaling last, after other samplers.
         use_beam_search: Whether to use beam search instead of sampling.
         length_penalty: Float that penalizes sequences based on their length.
             Used in beam search.
@@ -133,6 +134,7 @@ class SamplingParams:
         mirostat_eta: float = 0,
         dynatemp_range: float = 0,
         dynatemp_exponent: float = 1,
+        temperature_last: bool = False,
         use_beam_search: bool = False,
         length_penalty: float = 1.0,
         early_stopping: Union[bool, str] = False,
@@ -167,6 +169,7 @@ class SamplingParams:
         self.mirostat_eta = mirostat_eta
         self.dynatemp_range = dynatemp_range
         self.dynatemp_exponent = dynatemp_exponent
+        self.temperature_last = temperature_last
         self.use_beam_search = use_beam_search
         self.length_penalty = length_penalty
         self.early_stopping = early_stopping
