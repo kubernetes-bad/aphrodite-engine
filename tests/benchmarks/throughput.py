@@ -66,6 +66,7 @@ def run_aphrodite(
     trust_remote_code: bool,
     dtype: str,
     kv_cache_dtype: str,
+    use_flash_attn: bool,
     disable_custom_all_reduce: bool,
 ) -> float:
     llm = LLM(
@@ -76,6 +77,8 @@ def run_aphrodite(
         seed=seed,
         trust_remote_code=trust_remote_code,
         dtype=dtype,
+        kv_cache_dtype=kv_cache_dtype,
+        use_flash_attn=use_flash_attn,
         disable_custom_all_reduce=disable_custom_all_reduce,
     )
 
@@ -177,7 +180,7 @@ def main(args: argparse.Namespace):  # pylint: disable=redefined-outer-name
             requests, args.model, args.tokenizer, args.quantization,
             args.tensor_parallel_size, args.seed, args.n, args.use_beam_search,
             args.trust_remote_code, args.dtype, args.kv_cache_dtype,
-            args.disable_custom_all_reduce)
+            args.use_flash_attn, args.disable_custom_all_reduce)
     elif args.backend == "hf":
         assert args.tensor_parallel_size == 1
         elapsed_time = run_hf(requests, args.model, tokenizer, args.n,
@@ -244,6 +247,9 @@ if __name__ == "__main__":
                         default="auto",
                         choices=["auto", "fp8_e5m2"],
                         help="The Data Type for the KV cache.")
+    parser.add_argument("--use-flash-attn",
+                        action="store_true",
+                        help="Use Flash Attention for Paged KV Cache.")
     parser.add_argument(
         "--disable-custom-all-reduce",
         action="store_true",

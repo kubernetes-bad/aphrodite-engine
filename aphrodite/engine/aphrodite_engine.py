@@ -92,6 +92,7 @@ class AphroditeEngine:
             f"Context Length = {model_config.max_model_len}\n"
             f"Enforce Eager Mode = {model_config.enforce_eager}\n"
             f"KV Cache Data Type = {cache_config.cache_dtype}\n"
+            f"Flash Attention = {model_config.use_flash_attn}\n"
             f"Device = {device_config.device}\n"
             f"Seed = {model_config.seed}")
         # TODO: Print more configs in debug mode.
@@ -293,6 +294,9 @@ class AphroditeEngine:
             self.lora_config.verify_with_model_config(self.model_config)
             self.lora_config.verify_with_scheduler_config(
                 self.scheduler_config)
+        if (self.model_config.use_flash_attn and
+            self.cache_config.cache_dtype) == "fp8_e5m2":
+            raise ValueError("Flash attention is not supported with fp8_e5m2.")
 
     def _init_cache(self) -> None:
         """Profiles the memory usage and initializes the KV cache.
