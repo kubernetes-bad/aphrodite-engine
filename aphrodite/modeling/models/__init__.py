@@ -12,6 +12,7 @@ logger = init_logger(__name__)
 _MODELS = {
     "DeciLMForCausalLM": ("decilm", "DeciLMForCausalLM"),
     "DeepseekForCausalLM": ("deepseek", "DeepseekForCausalLM"),
+    "GemmaForCausalLM": ("gemma", "GemmaForCausalLM"),
     "GPTJForCausalLM": ("gpt_j", "GPTJForCausalLM"),
     "GPTNeoXForCausalLM": ("gpt_neox", "GPTNeoXForCausalLM"),
     "LlamaForCausalLM": ("llama", "LlamaForCausalLM"),

@@ -4,7 +4,7 @@ ray >= 2.9
 sentencepiece
 numpy
 torch == 2.2.0
-transformers >= 4.36.0 # for mixtral
+transformers >= 4.38.0 # for gemma
 uvicorn
 openai # for fastapi's openai proxy emulation
 xformers >= 0.0.24
