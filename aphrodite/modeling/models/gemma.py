@@ -93,12 +93,7 @@ class GemmaMLP(nn.Module):
         self.act_fn = nn.GELU()
 
     def forward(self, x):
-        if self.merge_weight:
-            gate_up, _ = self.gate_up_proj(x)
-        else:
-            up, _ = self.up_proj(x)
-            gate, _ = self.gate_proj(x)
-            gate_up = torch.cat([gate, up], dim=-1)
+        gate, _ = self.gate_proj(x)
         gate = self.act_fn(gate)
         up, _ = self.up_proj(x)
         fuse = gate * up
@@ -170,15 +165,12 @@ class GemmaAttention(nn.Module):
             linear_method=linear_method,
         )
 
-        is_neox_style = True if linear_method is None or linear_method.quant_config.rope_style(
-        ) is None else linear_method.quant_config.rope_style()
         self.rotary_emb = get_rope(
             self.head_dim,
             rotary_dim=self.head_dim,
             max_position=max_position_embeddings,
             base=self.rope_theta,
             is_neox_style=True,
-            is_neox_style=is_neox_style,
         )
         self.attn = PagedAttention(self.num_heads,
                                    self.head_dim,
@@ -336,8 +328,8 @@ class GemmaForCausalLM(nn.Module):
         hidden_states: torch.Tensor,
         sampling_metadata: SamplingMetadata,
     ) -> Optional[SamplerOutput]:
-        next_tokens = self.sampler(self.model.embed_tokens.weight,
-                                   hidden_states, sampling_metadata)
+        next_tokens = self.sampler(self.model.embed_tokens(hidden_states),
+                                   sampling_metadata)
         return next_tokens
 
     def load_weights(self,
